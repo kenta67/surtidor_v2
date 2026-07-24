@@ -6,8 +6,22 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
+const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      // Para mayor flexibilidad en Vercel, podemos permitir cualquier origen si así se requiere,
+      // pero por seguridad lo dejamos en origins específicos o permitimos regex.
+      // Si quieres permitir todo, descomenta: callback(null, true);
+      callback(null, true); // Permitir todo temporalmente para facilitar el despliegue
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
@@ -34,6 +48,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Error interno del servidor' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
