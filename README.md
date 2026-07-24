@@ -8,6 +8,12 @@ Sistema de gestión para surtidores de distribución de combustible, desarrollad
 - **Backend**: Node.js + Express
 - **Base de datos**: Supabase (PostgreSQL)
 
+## Proyecto desplegado
+
+Accede a la aplicación en producción aquí:
+
+- https://surtidor-v2.vercel.app/#/login
+
 ## Estructura del Proyecto
 
 ```
