@@ -37,6 +37,11 @@ app.use('/api/clientes', require('./routes/clientes'));
 app.use('/api/usuarios', require('./routes/usuarios'));
 app.use('/api/reportes', require('./routes/reportes'));
 
+// Rutas base
+app.get('/', (req, res) => {
+  res.json({ message: 'API de Surtidor v2 funcionando correctamente.' });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
