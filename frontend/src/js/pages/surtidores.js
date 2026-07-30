@@ -17,63 +17,73 @@ async function loadTable(container) {
   const data = await api.get('/surtidores');
 
   container.innerHTML = `
-    <div class="card">
-      <div class="card-header">
-        <h3>Listado de Surtidores</h3>
+    <div class="card" style="background: transparent; border: none; box-shadow: none;">
+      <div class="card-header" style="background: var(--bg-secondary); border-radius: var(--radius-lg); margin-bottom: 2rem; border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+        <h3>Estación de Combustible</h3>
         ${auth.isAdmin() ? '<button class="btn btn-primary btn-sm" id="btn-add-surtidor">+ Nuevo Surtidor</button>' : ''}
       </div>
-      <div class="card-body">
-        <div class="table-container">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Combustible</th>
-                <th>Código</th>
-                <th>Nivel</th>
-                <th>Capacidad</th>
-                <th>Estado</th>
-                <th>Nivel Binario</th>
-                ${auth.isAdmin() ? '<th>Acciones</th>' : ''}
-              </tr>
-            </thead>
-            <tbody>
-              ${data.length === 0 ? `<tr><td colspan="${auth.isAdmin() ? 8 : 7}" class="table-empty">No hay surtidores registrados</td></tr>` : ''}
-              ${data.map(s => {
-                const pct = s.porcentaje_nivel || 0;
-                return `
-                <tr>
-                  <td><strong>${s.numero}</strong></td>
-                  <td>${s.tipos_combustible?.nombre || '-'}</td>
-                  <td><span class="binary-code">${s.tipos_combustible?.codigo_binario || '--'}</span></td>
-                  <td style="min-width: 150px;">
-                    <div class="level-bar">
-                      <div class="level-bar-fill ${getLevelClass(pct)}" style="width: ${Math.min(pct, 100)}%"></div>
+      <div class="surtidores-page-grid">
+        ${data.length === 0 ? `<div class="table-empty" style="grid-column: 1 / -1; background: var(--bg-secondary); border-radius: var(--radius-lg); border: 1px solid var(--border);">No hay surtidores registrados</div>` : ''}
+        ${data.map(s => {
+          const cap = parseFloat(s.capacidad_total) || 1;
+          const nivel = parseFloat(s.nivel_actual) || 0;
+          const pct = Math.min(100, Math.max(0, (nivel / cap) * 100));
+          
+          // Cambiar tono (Hue) de 0 (Rojo) a 120 (Verde)
+          const hue = 120 * (pct / 100);
+          const pumpColor = `hsl(${hue}, 75%, 64%)`;
+
+          return `
+          <div class="surtidor-pump-card" style="--pump-color: ${pumpColor};">
+            <div class="pump-cap-top"></div>
+            <div class="pump-main">
+              <div class="pump-screen-area">
+                <div class="pump-screen">
+                  <div class="screen-content">
+                    <div class="screen-row">
+                      <span class="screen-val bold">${s.tipos_combustible?.nombre || '-'}</span>
                     </div>
-                    <div class="level-info">
-                      <span>${formatCurrency(s.nivel_actual)} L</span>
-                      <span>${pct}%</span>
+                    <div class="screen-row">
+                      <span class="screen-val">${formatCurrency(s.nivel_actual)} L</span>
                     </div>
-                  </td>
-                  <td>${formatCurrency(s.capacidad_total)} L</td>
-                  <td><span class="badge ${s.activo ? 'badge-success' : 'badge-neutral'}">${s.activo ? 'Activo' : 'Inactivo'}</span></td>
-                  <td><span class="binary-code">${s.nivel_binario}</span></td>
-                  ${auth.isAdmin() ? `
-                  <td>
-                    <div class="table-actions">
-                      <button class="btn-icon" title="Editar" data-edit="${s.id}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                      </button>
-                      <button class="btn-icon text-danger" title="Eliminar" data-delete="${s.id}" data-name="Surtidor #${s.numero}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                      </button>
+                  </div>
+                  <div class="pump-dial-container">
+                    <div class="pump-dial">
+                      <div class="pump-dial-needle" style="transform: rotate(${-90 + (pct * 1.8)}deg);"></div>
                     </div>
-                  </td>` : ''}
-                </tr>`;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+                </div>
+              </div>
+              <div class="pump-buttons">
+                <div class="pump-btn"></div>
+                <div class="pump-btn"></div>
+                <div class="pump-btn"></div>
+              </div>
+              
+              <div class="pump-info-bottom">
+                <div class="pump-number">#${s.numero}</div>
+                <span class="badge ${s.activo ? 'badge-success' : 'badge-neutral'}">${s.activo ? 'Activo' : 'Inactivo'}</span>
+              </div>
+              
+              ${auth.isAdmin() ? `
+              <div class="pump-actions">
+                <button class="btn btn-sm btn-icon" style="background: rgba(255,255,255,0.2); color: white;" title="Editar" data-edit="${s.id}">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="btn btn-sm btn-icon" style="background: rgba(255,255,255,0.2); color: white;" title="Eliminar" data-delete="${s.id}" data-name="Surtidor #${s.numero}">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </div>` : ''}
+            </div>
+            <div class="pump-cap-bottom"></div>
+            
+            <div class="pump-hose-assembly">
+              <div class="pump-hose-pipe"></div>
+              <div class="pump-nozzle-handle"></div>
+              <div class="pump-nozzle-tip"></div>
+            </div>
+          </div>`;
+        }).join('')}
       </div>
     </div>
   `;

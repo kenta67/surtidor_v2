@@ -1,4 +1,4 @@
-const CACHE_NAME = 'surtidor-v1';
+const CACHE_NAME = 'surtidor-cache-v6';
 const STATIC_ASSETS = [
   '/',
   '/src/css/styles.css',

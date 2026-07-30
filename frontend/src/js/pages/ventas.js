@@ -81,17 +81,24 @@ async function openVentaForm(container) {
         </div>
         <div class="form-group">
           <label for="venta-cliente">Cliente</label>
-          <select id="venta-cliente" required>
-            <option value="">Seleccionar cliente...</option>
-            ${clientes.filter(c => c.activo).map(c => `<option value="${c.id}">${c.nombre} - ${c.numero_documento}</option>`).join('')}
-          </select>
+          <div style="display: flex; gap: 0.5rem;">
+            <select id="venta-cliente-tipo" style="width: 110px;">
+              <option value="NIT">NIT</option>
+              <option value="CI">CI</option>
+              <option value="Otro">Otro</option>
+            </select>
+            <input type="text" id="venta-cliente" list="clientes-list" autocomplete="off" required placeholder="Escriba el nombre o documento..." style="flex: 1;">
+          </div>
+          <datalist id="clientes-list">
+            ${clientes.filter(c => c.activo).map(c => `<option value="${c.numero_documento} - ${c.nombre}"></option>`).join('')}
+          </datalist>
         </div>
         <div class="form-group">
-          <label for="venta-vehiculo">Vehículo</label>
-          <select id="venta-vehiculo" required>
-            <option value="">Seleccionar vehículo...</option>
-            ${vehiculos.filter(v => v.activo).map(v => `<option value="${v.id}">${v.placa} - ${v.marca || ''} ${v.modelo || ''}</option>`).join('')}
-          </select>
+          <label for="venta-vehiculo">Vehículo (Placa)</label>
+          <input type="text" id="venta-vehiculo" list="vehiculos-list" autocomplete="off" required placeholder="Escriba la placa del vehículo...">
+          <datalist id="vehiculos-list">
+            ${vehiculos.filter(v => v.activo).map(v => `<option value="${v.placa}"></option>`).join('')}
+          </datalist>
         </div>
         <div class="form-group">
           <label for="venta-litros">Litros</label>
@@ -129,17 +136,18 @@ async function openVentaForm(container) {
 
     document.getElementById('btn-save-venta').addEventListener('click', async () => {
       const surtidor_id = parseInt(surtSelect.value);
-      const cliente_id = parseInt(document.getElementById('venta-cliente').value);
-      const vehiculo_id = parseInt(document.getElementById('venta-vehiculo').value);
+      const cliente_texto = document.getElementById('venta-cliente').value.trim();
+      const cliente_tipo = document.getElementById('venta-cliente-tipo').value;
+      const vehiculo_texto = document.getElementById('venta-vehiculo').value.trim().toUpperCase();
       const litros = parseFloat(litrosInput.value);
 
-      if (!surtidor_id || !cliente_id || !vehiculo_id || !litros) {
-        showToast('Complete todos los campos', 'warning');
+      if (!surtidor_id || !cliente_texto || !vehiculo_texto || !litros) {
+        showToast('Complete todos los campos requeridos', 'warning');
         return;
       }
 
       try {
-        await api.post('/ventas', { surtidor_id, vehiculo_id, cliente_id, litros });
+        await api.post('/ventas', { surtidor_id, cliente_texto, cliente_tipo, vehiculo_texto, litros });
         showToast('Venta registrada correctamente', 'success');
         closeModal();
         await loadVentas(container);

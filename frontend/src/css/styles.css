@@ -57,6 +57,22 @@
   --transition: 150ms ease;
 }
 
+[data-theme="dark"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --sidebar-bg: #0b0f19;
+  --sidebar-hover: #1e293b;
+  --sidebar-active: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+
 /* ============================================================
    RESET & BASE
    ============================================================ */
@@ -74,10 +90,15 @@ html {
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--bg-primary);
+  background-color: var(--bg-primary);
+  background-image: radial-gradient(circle, transparent 40px, rgba(203, 213, 225, 0.74) 40px, rgba(203, 213, 225, 0.74) 42px, transparent 42px), radial-gradient(circle, transparent 80px, rgba(203, 213, 225, 0.74) 80px, rgba(203, 213, 225, 0.74) 82px, transparent 82px), radial-gradient(circle, transparent 120px, rgba(203, 213, 225, 0.74) 120px, rgba(203, 213, 225, 0.74) 122px, transparent 122px), linear-gradient(45deg, #236c8b, #e2e8f0);
+  background-size: 320px 320px, 320px 320px, 320px 320px, 100% 100%;
+  background-position: 0 0, 0 0;
+  background-repeat: repeat, no-repeat;
   color: var(--text-primary);
   line-height: 1.5;
   overflow-x: hidden;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 a {
@@ -103,6 +124,34 @@ table {
   width: 100%;
 }
 
+/* Theme Toggle Button Styles */
+.theme-toggle-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background 0.2s, color 0.2s;
+  z-index: 1000;
+}
+
+.theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="dark"] .theme-toggle-btn {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .theme-toggle-btn:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
 /* ============================================================
    LOGIN VIEW
    ============================================================ */
@@ -112,7 +161,7 @@ table {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-primary);
+  background: transparent;
   padding: 1rem;
 }
 
@@ -1028,6 +1077,234 @@ table {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+/* ============================================================
+   SURTIDORES PUMP LAYOUT
+   ============================================================ */
+
+.surtidores-page-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 3rem;
+  padding: 2rem 1rem;
+  justify-items: center;
+}
+
+.surtidor-pump-card {
+  width: 200px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s;
+  /* To accommodate the hose on the right */
+  margin-right: 40px; 
+}
+
+.surtidor-pump-card:hover {
+  transform: translateY(-5px);
+}
+
+.pump-cap-top {
+  height: 20px;
+  background: #6e6267;
+  border-radius: 10px 10px 0 0;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.pump-cap-top::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 10px;
+  right: 10px;
+  height: 8px;
+  background: var(--pump-color, #ea5e66);
+  border-radius: 10px 10px 0 0;
+}
+
+.pump-main {
+  background: var(--pump-color, #ea5e66);
+  width: 100%;
+  flex: 1;
+  padding: 20px;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset -5px 0 10px rgba(0,0,0,0.1);
+}
+
+.pump-screen-area {
+  background: #ccf2fc;
+  border-radius: 8px;
+  padding: 15px 15px 0 15px;
+  height: 140px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 3px 5px rgba(0,0,0,0.1);
+}
+
+.screen-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.screen-row {
+  display: flex;
+  justify-content: center;
+}
+
+.screen-row .screen-val {
+  font-family: 'Courier New', Courier, monospace;
+  color: #6e6267;
+  font-size: 0.9rem;
+  background: rgba(255,255,255,0.5);
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+.screen-row .screen-val.bold {
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.pump-dial-container {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 50px;
+  overflow: hidden;
+}
+
+.pump-dial {
+  width: 100px;
+  height: 100px;
+  background: #fbe07f;
+  border-radius: 50%;
+  position: relative;
+}
+
+.pump-dial-needle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 4px;
+  background: #6e6267;
+  transform-origin: 0% 50%;
+  border-radius: 2px;
+  /* Start rotation is applied inline based on percentage */
+  transition: transform 0.5s ease;
+}
+
+.pump-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  padding: 0 10px;
+}
+
+.pump-btn {
+  width: 35px;
+  height: 10px;
+  background: #fbe07f;
+  border-radius: 10px;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+}
+
+.pump-info-bottom {
+  margin-top: auto;
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pump-number {
+  color: white;
+  font-weight: 900;
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+.pump-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 10px;
+}
+
+.pump-cap-bottom {
+  height: 15px;
+  background: #6e6267;
+  border-radius: 0 0 5px 5px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.pump-cap-bottom::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: -5%;
+  right: -5%;
+  height: 5px;
+  background: #50464a;
+  border-radius: 5px;
+}
+
+/* Hose assembly */
+.pump-hose-assembly {
+  position: absolute;
+  right: -50px;
+  top: 50px;
+  height: calc(100% - 50px);
+  width: 60px;
+  z-index: 1;
+}
+
+.pump-hose-pipe {
+  position: absolute;
+  right: 15px;
+  top: 90px;
+  width: 35px;
+  height: calc(100% - 70px);
+  border: 8px solid #6e6267;
+  border-left: none;
+  border-top: none;
+  border-radius: 0 0 20px 0;
+}
+
+.pump-nozzle-handle {
+  position: absolute;
+  right: 10px;
+  top: 0;
+  width: 25px;
+  height: 70px;
+  background: var(--pump-color, #ea5e66);
+  border-radius: 5px;
+  z-index: 3;
+}
+
+.pump-nozzle-tip {
+  position: absolute;
+  right: 13px;
+  top: -25px;
+  width: 8px;
+  height: 30px;
+  background: #6e6267;
+  border-radius: 5px;
+  transform: rotate(20deg);
+  transform-origin: bottom center;
+  z-index: 2;
 }
 
 /* ============================================================

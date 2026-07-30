@@ -98,9 +98,8 @@ function openForm(item = null) {
           <label for="cli-tipo-doc">Tipo de documento</label>
           <select id="cli-tipo-doc" required>
             <option value="">Seleccionar...</option>
-            <option value="DNI" ${item?.tipo_documento === 'DNI' ? 'selected' : ''}>DNI</option>
-            <option value="RUC" ${item?.tipo_documento === 'RUC' ? 'selected' : ''}>RUC</option>
-            <option value="Pasaporte" ${item?.tipo_documento === 'Pasaporte' ? 'selected' : ''}>Pasaporte</option>
+            <option value="CI" ${item?.tipo_documento === 'CI' ? 'selected' : ''}>CI</option>
+            <option value="NIT" ${item?.tipo_documento === 'NIT' ? 'selected' : ''}>NIT</option>
             <option value="Otro" ${item?.tipo_documento === 'Otro' ? 'selected' : ''}>Otro</option>
           </select>
         </div>

@@ -37,10 +37,10 @@ router.get('/', authMiddleware, async (req, res) => {
 
 // POST /api/ventas
 router.post('/', authMiddleware, async (req, res) => {
-  const { surtidor_id, vehiculo_id, cliente_id, litros } = req.body;
+  const { surtidor_id, cliente_texto, cliente_tipo, vehiculo_texto, litros } = req.body;
 
-  if (!surtidor_id || !vehiculo_id || !cliente_id || !litros) {
-    return res.status(400).json({ error: 'Campos requeridos: surtidor_id, vehiculo_id, cliente_id, litros' });
+  if (!surtidor_id || !cliente_texto || !vehiculo_texto || !litros) {
+    return res.status(400).json({ error: 'Campos requeridos: surtidor_id, cliente_texto, vehiculo_texto, litros' });
   }
 
   try {
@@ -66,6 +66,65 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 
     const precio_por_litro = surtidor.tipos_combustible.precio_por_litro;
+
+    // Procesar Vehículo por texto
+    let vehiculo_id;
+    const placaClean = vehiculo_texto.trim().toUpperCase();
+    const { data: vehiculos } = await supabaseAdmin
+      .from('vehiculos')
+      .select('id')
+      .eq('placa', placaClean)
+      .limit(1);
+      
+    if (vehiculos && vehiculos.length > 0) {
+      vehiculo_id = vehiculos[0].id;
+    } else {
+      const { data: newVehiculo, error: vErr } = await supabaseAdmin
+        .from('vehiculos')
+        .insert({ placa: placaClean, marca: 'Genérico', modelo: 'Genérico', color: 'N/A' })
+        .select('id')
+        .single();
+      if (vErr) throw vErr;
+      vehiculo_id = newVehiculo.id;
+    }
+
+    // Procesar Cliente
+    let cliente_id;
+    let doc = cliente_texto;
+    let nom = 'S/N';
+    
+    if (cliente_texto.includes(' - ')) {
+      const parts = cliente_texto.split(' - ');
+      doc = parts[0].trim();
+      nom = parts.slice(1).join(' - ').trim();
+    } else {
+      if (/^\\d+$/.test(cliente_texto)) {
+        doc = cliente_texto;
+      } else {
+        nom = cliente_texto;
+        doc = 'S/N-' + Date.now().toString().slice(-6);
+      }
+    }
+
+    // Buscar si existe el cliente
+    const { data: clientes } = await supabaseAdmin
+      .from('clientes')
+      .select('id')
+      .or(`numero_documento.eq."${doc}",nombre.eq."${cliente_texto}"`)
+      .limit(1);
+
+    if (clientes && clientes.length > 0) {
+      cliente_id = clientes[0].id;
+    } else {
+      // Crear cliente nuevo
+      const { data: newCliente, error: cErr } = await supabaseAdmin
+        .from('clientes')
+        .insert({ nombre: nom, tipo_documento: cliente_tipo || 'Otro', numero_documento: doc })
+        .select('id')
+        .single();
+      if (cErr) throw cErr;
+      cliente_id = newCliente.id;
+    }
 
     // Registrar venta
     const { data: venta, error: ventaError } = await supabaseAdmin
